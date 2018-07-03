@@ -34,13 +34,6 @@ class Calendar extends React.Component {
             end: day
         }));
     }
-
-    generateDays(days) {
-        return {
-            start: calendarStartDays,
-            end: calendarEndDays
-        }
-    }
     
     render() {
         let days = Array(getMonthDays(5)).fill().map((_, index) => index + 1);

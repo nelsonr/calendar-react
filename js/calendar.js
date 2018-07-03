@@ -58,14 +58,6 @@ var Calendar = function (_React$Component) {
             });
         }
     }, {
-        key: "generateDays",
-        value: function generateDays(days) {
-            return {
-                start: calendarStartDays,
-                end: calendarEndDays
-            };
-        }
-    }, {
         key: "render",
         value: function render() {
             var _this2 = this;
