@@ -83,6 +83,12 @@ var Calendar = function (_React$Component) {
                     }
                 }
 
+                if (_this2.state.start && _this2.state.end) {
+                    if (day > _this2.state.start && day < _this2.state.end) {
+                        className += " calendar--range";
+                    }
+                }
+
                 return React.createElement(
                     "div",
                     { className: className, key: "start-" + day, onClick: function onClick(_) {

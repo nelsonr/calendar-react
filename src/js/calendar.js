@@ -54,6 +54,12 @@ class Calendar extends React.Component {
                 }
             }
 
+            if (this.state.start && this.state.end) {
+                if (day > this.state.start && day < this.state.end) {
+                    className += " calendar--range";
+                }
+            }
+
             return <div className={className} key={"start-" + day} onClick={_ => this.setStart(day)}>{day}</div>
         });
 
