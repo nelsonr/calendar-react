@@ -1,100 +1,180 @@
-var getMonthDays = function (month) {
+const getMonthDaysCount = function (month) {
     var today = new Date();
-    var d = new Date(today.getFullYear(), month, 0);
+    var d = new Date(today.getFullYear(), month + 1, 0);
 
     return d.getDate();
 }
 
-class Calendar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            start: null,
-            end: null
-        }
-    }
+const getMonthDays = function (month) {
+    const monthDaysCount = getMonthDaysCount(month);
+    const currentYear = (new Date()).getFullYear();
 
-    setStart(day) {
-        if (day < this.state.end) {
-            this.setState(prevState => ({
-                start: day,
-                end: prevState.end
-            }));
-        } else {
-            this.setState(_ => ({
-                start: day,
-                end: null
-            }));
-        }
-    }
+    return Array(monthDaysCount).fill().map((_, index) => 
+        new Date(currentYear, month, index + 1)
+    );
+}
 
-    setEnd(day) {
-        this.setState(prevState => ({
-            start: prevState.start,
-            end: day
-        }));
-    }
-    
+var months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
+
+class Calendar extends React.Component {    
     render() {
-        let days = Array(getMonthDays(5)).fill().map((_, index) => index + 1);
-        
-        let calendarStartDays = days.map((day) => {
-            let className = "calendar__day";
-            
-            if (this.state.start) {
-                if (day === this.state.start) {
-                    className += " calendar--range calendar--start";
-                }
-            }
-
-            if (this.state.start && this.state.end) {
-                if (day > this.state.start && day < this.state.end) {
-                    className += " calendar--range";
-                }
-            }
-
-            return <div className={className} key={"start-" + day} onClick={_ => this.setStart(day)}>{day}</div>
-        });
-
-        let calendarEndDays = days.map((day) => {
-            let className = "calendar__day";
-            
-            if (this.state.start) {
-                if (day <= this.state.start) {
-                    className += " calendar--disabled";
-                }
-            } else {
-                className += " calendar--disabled";
-            }
-
-            if (this.state.start && this.state.end) {
-                if (day > this.state.start && day < this.state.end) {
-                    className += " calendar--range";
-                }
-
-                if (day === this.state.end) {
-                    className += " calendar--range calendar--end";
-                }
-            }
-
-            return <div className={className} key={"end-" + day} onClick={_ => this.setEnd(day)}>{day}</div>
-        });
-        
         return (
-            <div className="calendars">
-                <div className="calendar">
-                    {calendarStartDays}
+            <div className="calendar">
+                <div className="calendar__header">
+                    <div className="calendar__month">{months[this.props.month]}</div>
+
+                    <div className="calendar__nav">
+                        <button className="calendar__prev" onClick={_ => this.props.changeMonth(-1)}>&lt;</button>
+                        <button className="calendar__next" onClick={_ => this.props.changeMonth(1)}>&gt;</button>
+                    </div>
                 </div>
 
-                <div className="calendar">
-                    {calendarEndDays}
+                <div className="calendar__days">
+                    {this.props.days}
                 </div>
             </div>
         );
     }
 }
 
+class CalendarDatePicker extends React.Component {
+    constructor(props) {
+        super(props);
+        
+        this.state = {
+            startDate: null,
+            endDate: null,
+            startingMonth: (new Date()).getMonth(),
+            endingMonth: (new Date()).getMonth() + 1
+        }
+
+        this.changeStartingMonth = this.changeStartingMonth.bind(this)
+        this.changeEndingMonth = this.changeEndingMonth.bind(this)
+    }
+    
+    setStart(day) {
+        if (day < this.state.endDate) {
+            this.setState({
+                startDate: day
+            });
+        } else {
+            this.setState({
+                startDate: day,
+                endDate: null
+            });
+        }
+    }
+
+    setEnd(day) {
+        this.setState({
+            endDate: day
+        });
+    }
+
+    changeStartingMonth(dir) {
+        let newMonth = this.state.startingMonth + dir;
+
+        if (newMonth < 0) {
+            newMonth = 11;
+        } else if (newMonth > 11) {
+            newMonth = 0;
+        }
+        
+        this.setState({
+            startingMonth: newMonth
+        });
+    }
+
+    changeEndingMonth(dir) {
+        let newMonth = this.state.endingMonth + dir;
+
+        if (newMonth < 0) {
+            newMonth = 11;
+        } else if (newMonth > 11) {
+            newMonth = 0;
+        }
+        
+        this.setState({
+            endingMonth: newMonth
+        });
+    }   
+    
+    render() {
+        let startingMonthDays = getMonthDays(this.state.startingMonth);
+        let endingMonthDays = getMonthDays(this.state.endingMonth);
+        
+        let calendarStartDays = startingMonthDays.map((day) => {
+            let className = "calendar__day";
+            
+            if (this.state.startDate) {
+                if (day.getTime() === this.state.startDate.getTime()) {
+                    className += " calendar--range calendar--start";
+                }
+            }
+
+            if (this.state.startDate && this.state.endDate) {
+                if (day > this.state.startDate && day < this.state.endDate) {
+                    className += " calendar--range";
+                }
+            }
+
+            return <div className={className} key={"start-" + day.getDate()} onClick={_ => this.setStart(day)}>{day.getDate()}</div>
+        });
+
+        let calendarEndDays = endingMonthDays.map((day) => {
+            let className = "calendar__day";
+            
+            if (this.state.startDate) {
+                if (day <= this.state.startDate) {
+                    className += " calendar--disabled";
+                }
+            } else {
+                className += " calendar--disabled";
+            }
+
+            if (this.state.startDate && this.state.endDate) {
+                if (day > this.state.startDate && day < this.state.endDate) {
+                    className += " calendar--range";
+                }
+
+                if (day.getTime() === this.state.endDate.getTime()) {
+                    className += " calendar--range calendar--end";
+                }
+            }
+
+            return <div className={className} key={"end-" + day.getDate()} onClick={_ => this.setEnd(day)}>{day.getDate()}</div>
+        });
+        
+        return (
+            <div className="calendars">
+                <Calendar 
+                    days={calendarStartDays} 
+                    month={this.state.startingMonth} 
+                    changeMonth={this.changeStartingMonth} />
+
+                <Calendar 
+                    days={calendarEndDays} 
+                    month={this.state.endingMonth} 
+                    changeMonth={this.changeEndingMonth} />
+            </div>
+        )
+    }
+}
+
 ReactDOM.render(
-    <Calendar />,
+    <CalendarDatePicker />,
     document.getElementById('app')
 );
