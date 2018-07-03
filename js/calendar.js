@@ -38,6 +38,17 @@ var Calendar = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
+            var prevButtonClass = "calendar__prev";
+            var nextButtonClass = "calendar__next";
+
+            if (this.props.showPrevButton === false) {
+                prevButtonClass += " hide";
+            }
+
+            if (this.props.showNextButton === false) {
+                nextButtonClass += " hide";
+            }
+
             return React.createElement(
                 "div",
                 { className: "calendar" },
@@ -54,14 +65,14 @@ var Calendar = function (_React$Component) {
                         { className: "calendar__nav" },
                         React.createElement(
                             "button",
-                            { className: "calendar__prev", onClick: function onClick(_) {
+                            { className: prevButtonClass, onClick: function onClick(_) {
                                     return _this2.props.changeMonth(-1);
                                 } },
                             "<"
                         ),
                         React.createElement(
                             "button",
-                            { className: "calendar__next", onClick: function onClick(_) {
+                            { className: nextButtonClass, onClick: function onClick(_) {
                                     return _this2.props.changeMonth(1);
                                 } },
                             ">"
@@ -101,8 +112,8 @@ var CalendarDatePicker = function (_React$Component2) {
     }
 
     _createClass(CalendarDatePicker, [{
-        key: "setStart",
-        value: function setStart(day) {
+        key: "setStartDate",
+        value: function setStartDate(day) {
             if (day < this.state.endDate) {
                 this.setState({
                     startDate: day
@@ -115,8 +126,8 @@ var CalendarDatePicker = function (_React$Component2) {
             }
         }
     }, {
-        key: "setEnd",
-        value: function setEnd(day) {
+        key: "setEndDate",
+        value: function setEndDate(day) {
             this.setState({
                 endDate: day
             });
@@ -127,9 +138,9 @@ var CalendarDatePicker = function (_React$Component2) {
             var newMonth = this.state.startingMonth + dir;
 
             if (newMonth < 0) {
-                newMonth = 11;
-            } else if (newMonth > 11) {
                 newMonth = 0;
+            } else if (newMonth > 11) {
+                newMonth = 11;
             }
 
             this.setState({
@@ -142,9 +153,9 @@ var CalendarDatePicker = function (_React$Component2) {
             var newMonth = this.state.endingMonth + dir;
 
             if (newMonth < 0) {
-                newMonth = 11;
-            } else if (newMonth > 11) {
                 newMonth = 0;
+            } else if (newMonth > 11) {
+                newMonth = 11;
             }
 
             this.setState({
@@ -158,6 +169,7 @@ var CalendarDatePicker = function (_React$Component2) {
 
             var startingMonthDays = getMonthDays(this.state.startingMonth);
             var endingMonthDays = getMonthDays(this.state.endingMonth);
+            var showNav = this.state.endingMonth - this.state.startingMonth > 1;
 
             var calendarStartDays = startingMonthDays.map(function (day) {
                 var className = "calendar__day";
@@ -177,7 +189,7 @@ var CalendarDatePicker = function (_React$Component2) {
                 return React.createElement(
                     "div",
                     { className: className, key: "start-" + day.getDate(), onClick: function onClick(_) {
-                            return _this4.setStart(day);
+                            return _this4.setStartDate(day);
                         } },
                     day.getDate()
                 );
@@ -207,7 +219,7 @@ var CalendarDatePicker = function (_React$Component2) {
                 return React.createElement(
                     "div",
                     { className: className, key: "end-" + day.getDate(), onClick: function onClick(_) {
-                            return _this4.setEnd(day);
+                            return _this4.setEndDate(day);
                         } },
                     day.getDate()
                 );
@@ -219,11 +231,15 @@ var CalendarDatePicker = function (_React$Component2) {
                 React.createElement(Calendar, {
                     days: calendarStartDays,
                     month: this.state.startingMonth,
-                    changeMonth: this.changeStartingMonth }),
+                    changeMonth: this.changeStartingMonth,
+                    showPrevButton: true,
+                    showNextButton: showNav }),
                 React.createElement(Calendar, {
                     days: calendarEndDays,
                     month: this.state.endingMonth,
-                    changeMonth: this.changeEndingMonth })
+                    changeMonth: this.changeEndingMonth,
+                    showPrevButton: showNav,
+                    showNextButton: true })
             );
         }
     }]);

@@ -31,14 +31,25 @@ var months = [
 
 class Calendar extends React.Component {    
     render() {
+        let prevButtonClass = "calendar__prev";
+        let nextButtonClass = "calendar__next";
+
+        if (this.props.showPrevButton === false) {
+            prevButtonClass += " hide";
+        }
+
+        if (this.props.showNextButton === false) {
+            nextButtonClass += " hide";
+        }
+        
         return (
             <div className="calendar">
                 <div className="calendar__header">
                     <div className="calendar__month">{months[this.props.month]}</div>
 
                     <div className="calendar__nav">
-                        <button className="calendar__prev" onClick={_ => this.props.changeMonth(-1)}>&lt;</button>
-                        <button className="calendar__next" onClick={_ => this.props.changeMonth(1)}>&gt;</button>
+                        <button className={prevButtonClass} onClick={_ => this.props.changeMonth(-1)}>&lt;</button>
+                        <button className={nextButtonClass} onClick={_ => this.props.changeMonth(1)}>&gt;</button>
                     </div>
                 </div>
 
@@ -65,7 +76,7 @@ class CalendarDatePicker extends React.Component {
         this.changeEndingMonth = this.changeEndingMonth.bind(this)
     }
     
-    setStart(day) {
+    setStartDate(day) {
         if (day < this.state.endDate) {
             this.setState({
                 startDate: day
@@ -78,7 +89,7 @@ class CalendarDatePicker extends React.Component {
         }
     }
 
-    setEnd(day) {
+    setEndDate(day) {
         this.setState({
             endDate: day
         });
@@ -88,9 +99,9 @@ class CalendarDatePicker extends React.Component {
         let newMonth = this.state.startingMonth + dir;
 
         if (newMonth < 0) {
-            newMonth = 11;
-        } else if (newMonth > 11) {
             newMonth = 0;
+        } else if (newMonth > 11) {
+            newMonth = 11;
         }
         
         this.setState({
@@ -102,9 +113,9 @@ class CalendarDatePicker extends React.Component {
         let newMonth = this.state.endingMonth + dir;
 
         if (newMonth < 0) {
-            newMonth = 11;
-        } else if (newMonth > 11) {
             newMonth = 0;
+        } else if (newMonth > 11) {
+            newMonth = 11;
         }
         
         this.setState({
@@ -115,6 +126,7 @@ class CalendarDatePicker extends React.Component {
     render() {
         let startingMonthDays = getMonthDays(this.state.startingMonth);
         let endingMonthDays = getMonthDays(this.state.endingMonth);
+        let showNav = (this.state.endingMonth - this.state.startingMonth > 1);
         
         let calendarStartDays = startingMonthDays.map((day) => {
             let className = "calendar__day";
@@ -131,7 +143,7 @@ class CalendarDatePicker extends React.Component {
                 }
             }
 
-            return <div className={className} key={"start-" + day.getDate()} onClick={_ => this.setStart(day)}>{day.getDate()}</div>
+            return <div className={className} key={"start-" + day.getDate()} onClick={_ => this.setStartDate(day)}>{day.getDate()}</div>
         });
 
         let calendarEndDays = endingMonthDays.map((day) => {
@@ -155,7 +167,7 @@ class CalendarDatePicker extends React.Component {
                 }
             }
 
-            return <div className={className} key={"end-" + day.getDate()} onClick={_ => this.setEnd(day)}>{day.getDate()}</div>
+            return <div className={className} key={"end-" + day.getDate()} onClick={_ => this.setEndDate(day)}>{day.getDate()}</div>
         });
         
         return (
@@ -163,12 +175,16 @@ class CalendarDatePicker extends React.Component {
                 <Calendar 
                     days={calendarStartDays} 
                     month={this.state.startingMonth} 
-                    changeMonth={this.changeStartingMonth} />
+                    changeMonth={this.changeStartingMonth}
+                    showPrevButton={true}
+                    showNextButton={showNav} />
 
                 <Calendar 
                     days={calendarEndDays} 
                     month={this.state.endingMonth} 
-                    changeMonth={this.changeEndingMonth} />
+                    changeMonth={this.changeEndingMonth}
+                    showPrevButton={showNav}
+                    showNextButton={true} />
             </div>
         )
     }
