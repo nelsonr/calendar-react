@@ -13,19 +13,94 @@ var getMonthDaysCount = function getMonthDaysCount(month) {
     return d.getDate();
 };
 
-var getMonthDays = function getMonthDays(month) {
+var getMonthDays = function getMonthDays(date) {
+    var year = date.getFullYear();
+    var month = date.getMonth();
     var monthDaysCount = getMonthDaysCount(month);
-    var currentYear = new Date().getFullYear();
 
     return Array(monthDaysCount).fill().map(function (_, index) {
-        return new Date(currentYear, month, index + 1);
+        return new Date(year, month, index + 1);
     });
 };
 
-var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+var months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-var Calendar = function (_React$Component) {
-    _inherits(Calendar, _React$Component);
+var DateDisplay = function (_React$Component) {
+    _inherits(DateDisplay, _React$Component);
+
+    function DateDisplay() {
+        _classCallCheck(this, DateDisplay);
+
+        return _possibleConstructorReturn(this, (DateDisplay.__proto__ || Object.getPrototypeOf(DateDisplay)).apply(this, arguments));
+    }
+
+    _createClass(DateDisplay, [{
+        key: "dateToString",
+        value: function dateToString(date) {
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+
+            if (day < 10) {
+                day = "0" + day;
+            }
+
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            return day + "/" + month + "/" + date.getFullYear();
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var startDate = "";
+            var endDate = "";
+            var clearBtnClass = "date-display__clear";
+
+            if (this.props.startDate) {
+                startDate = this.dateToString(this.props.startDate);
+            }
+
+            if (this.props.endDate) {
+                endDate = this.dateToString(this.props.endDate);
+            }
+
+            if (this.props.startDate === null && this.props.endDate === null) {
+                clearBtnClass += " hide";
+            }
+
+            return React.createElement(
+                "div",
+                { className: "date-display" },
+                React.createElement(
+                    "div",
+                    { className: "date-display__content" },
+                    React.createElement(
+                        "span",
+                        null,
+                        startDate
+                    ),
+                    " - ",
+                    React.createElement(
+                        "span",
+                        null,
+                        endDate
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: clearBtnClass, onClick: this.props.clearSelection },
+                    "Clear"
+                )
+            );
+        }
+    }]);
+
+    return DateDisplay;
+}(React.Component);
+
+var Calendar = function (_React$Component2) {
+    _inherits(Calendar, _React$Component2);
 
     function Calendar() {
         _classCallCheck(this, Calendar);
@@ -36,7 +111,7 @@ var Calendar = function (_React$Component) {
     _createClass(Calendar, [{
         key: "render",
         value: function render() {
-            var _this2 = this;
+            var _this3 = this;
 
             var prevButtonClass = "calendar__prev";
             var nextButtonClass = "calendar__next";
@@ -58,7 +133,7 @@ var Calendar = function (_React$Component) {
                     React.createElement(
                         "div",
                         { className: "calendar__month" },
-                        months[this.props.month]
+                        months[this.props.month.getMonth()] + " " + this.props.month.getFullYear()
                     ),
                     React.createElement(
                         "div",
@@ -66,17 +141,56 @@ var Calendar = function (_React$Component) {
                         React.createElement(
                             "button",
                             { className: prevButtonClass, onClick: function onClick(_) {
-                                    return _this2.props.changeMonth(-1);
+                                    return _this3.props.changeMonth(-1);
                                 } },
                             "<"
                         ),
                         React.createElement(
                             "button",
                             { className: nextButtonClass, onClick: function onClick(_) {
-                                    return _this2.props.changeMonth(1);
+                                    return _this3.props.changeMonth(1);
                                 } },
                             ">"
                         )
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "calendar__week-days" },
+                    React.createElement(
+                        "div",
+                        null,
+                        "S"
+                    ),
+                    React.createElement(
+                        "div",
+                        null,
+                        "T"
+                    ),
+                    React.createElement(
+                        "div",
+                        null,
+                        "Q"
+                    ),
+                    React.createElement(
+                        "div",
+                        null,
+                        "Q"
+                    ),
+                    React.createElement(
+                        "div",
+                        null,
+                        "S"
+                    ),
+                    React.createElement(
+                        "div",
+                        null,
+                        "S"
+                    ),
+                    React.createElement(
+                        "div",
+                        null,
+                        "D"
                     )
                 ),
                 React.createElement(
@@ -91,24 +205,30 @@ var Calendar = function (_React$Component) {
     return Calendar;
 }(React.Component);
 
-var CalendarDatePicker = function (_React$Component2) {
-    _inherits(CalendarDatePicker, _React$Component2);
+var CalendarDatePicker = function (_React$Component3) {
+    _inherits(CalendarDatePicker, _React$Component3);
 
     function CalendarDatePicker(props) {
         _classCallCheck(this, CalendarDatePicker);
 
-        var _this3 = _possibleConstructorReturn(this, (CalendarDatePicker.__proto__ || Object.getPrototypeOf(CalendarDatePicker)).call(this, props));
+        var _this4 = _possibleConstructorReturn(this, (CalendarDatePicker.__proto__ || Object.getPrototypeOf(CalendarDatePicker)).call(this, props));
 
-        _this3.state = {
+        var startingMonth = new Date();
+        startingMonth.setDate(1);
+
+        var endingMonth = new Date(startingMonth.getFullYear(), startingMonth.getMonth() + 1);
+
+        _this4.state = {
             startDate: null,
             endDate: null,
-            startingMonth: new Date().getMonth(),
-            endingMonth: new Date().getMonth() + 1
+            startingMonth: startingMonth,
+            endingMonth: endingMonth
         };
 
-        _this3.changeStartingMonth = _this3.changeStartingMonth.bind(_this3);
-        _this3.changeEndingMonth = _this3.changeEndingMonth.bind(_this3);
-        return _this3;
+        _this4.changeStartingMonth = _this4.changeStartingMonth.bind(_this4);
+        _this4.changeEndingMonth = _this4.changeEndingMonth.bind(_this4);
+        _this4.clearSelection = _this4.clearSelection.bind(_this4);
+        return _this4;
     }
 
     _createClass(CalendarDatePicker, [{
@@ -135,53 +255,63 @@ var CalendarDatePicker = function (_React$Component2) {
     }, {
         key: "changeStartingMonth",
         value: function changeStartingMonth(dir) {
-            var newMonth = this.state.startingMonth + dir;
-
-            if (newMonth < 0) {
-                newMonth = 0;
-            } else if (newMonth > 11) {
-                newMonth = 11;
-            }
-
             this.setState({
-                startingMonth: newMonth
+                startingMonth: new Date(this.state.startingMonth.getFullYear(), this.state.startingMonth.getMonth() + dir, 1)
             });
         }
     }, {
         key: "changeEndingMonth",
         value: function changeEndingMonth(dir) {
-            var newMonth = this.state.endingMonth + dir;
+            this.setState({
+                endingMonth: new Date(this.state.endingMonth.getFullYear(), this.state.endingMonth.getMonth() + dir, 1)
+            });
+        }
+    }, {
+        key: "clearSelection",
+        value: function clearSelection() {
+            this.setState({
+                startDate: null,
+                endDate: null
+            });
+        }
+    }, {
+        key: "showNav",
+        value: function showNav() {
+            var startingMonth = this.state.startingMonth.getMonth();
+            var startingYear = this.state.startingMonth.getFullYear();
+            var endingMonth = this.state.endingMonth.getMonth();
+            var endingYear = this.state.endingMonth.getFullYear();
 
-            if (newMonth < 0) {
-                newMonth = 0;
-            } else if (newMonth > 11) {
-                newMonth = 11;
+            if (endingYear > startingYear) {
+                return true;
             }
 
-            this.setState({
-                endingMonth: newMonth
-            });
+            return endingMonth - startingMonth > 0;
         }
     }, {
         key: "render",
         value: function render() {
-            var _this4 = this;
+            var _this5 = this;
 
             var startingMonthDays = getMonthDays(this.state.startingMonth);
             var endingMonthDays = getMonthDays(this.state.endingMonth);
-            var showNav = this.state.endingMonth - this.state.startingMonth > 1;
+            var showNav = this.showNav();
 
             var calendarStartDays = startingMonthDays.map(function (day) {
                 var className = "calendar__day";
 
-                if (_this4.state.startDate) {
-                    if (day.getTime() === _this4.state.startDate.getTime()) {
+                if (day.getDate() === 1) {
+                    className += " calendar__day--offset-" + (day.getDay() || 7);
+                }
+
+                if (_this5.state.startDate) {
+                    if (day.getTime() === _this5.state.startDate.getTime()) {
                         className += " calendar--range calendar--start";
                     }
                 }
 
-                if (_this4.state.startDate && _this4.state.endDate) {
-                    if (day > _this4.state.startDate && day < _this4.state.endDate) {
+                if (_this5.state.startDate && _this5.state.endDate) {
+                    if (day > _this5.state.startDate && day < _this5.state.endDate) {
                         className += " calendar--range";
                     }
                 }
@@ -189,7 +319,7 @@ var CalendarDatePicker = function (_React$Component2) {
                 return React.createElement(
                     "div",
                     { className: className, key: "start-" + day.getDate(), onClick: function onClick(_) {
-                            return _this4.setStartDate(day);
+                            return _this5.setStartDate(day);
                         } },
                     day.getDate()
                 );
@@ -198,20 +328,24 @@ var CalendarDatePicker = function (_React$Component2) {
             var calendarEndDays = endingMonthDays.map(function (day) {
                 var className = "calendar__day";
 
-                if (_this4.state.startDate) {
-                    if (day <= _this4.state.startDate) {
+                if (day.getDate() === 1) {
+                    className += " calendar__day--offset-" + (day.getDay() || 7);
+                }
+
+                if (_this5.state.startDate) {
+                    if (day <= _this5.state.startDate) {
                         className += " calendar--disabled";
                     }
                 } else {
                     className += " calendar--disabled";
                 }
 
-                if (_this4.state.startDate && _this4.state.endDate) {
-                    if (day > _this4.state.startDate && day < _this4.state.endDate) {
+                if (_this5.state.startDate && _this5.state.endDate) {
+                    if (day > _this5.state.startDate && day < _this5.state.endDate) {
                         className += " calendar--range";
                     }
 
-                    if (day.getTime() === _this4.state.endDate.getTime()) {
+                    if (day.getTime() === _this5.state.endDate.getTime()) {
                         className += " calendar--range calendar--end";
                     }
                 }
@@ -219,7 +353,7 @@ var CalendarDatePicker = function (_React$Component2) {
                 return React.createElement(
                     "div",
                     { className: className, key: "end-" + day.getDate(), onClick: function onClick(_) {
-                            return _this4.setEndDate(day);
+                            return _this5.setEndDate(day);
                         } },
                     day.getDate()
                 );
@@ -227,19 +361,27 @@ var CalendarDatePicker = function (_React$Component2) {
 
             return React.createElement(
                 "div",
-                { className: "calendars" },
-                React.createElement(Calendar, {
-                    days: calendarStartDays,
-                    month: this.state.startingMonth,
-                    changeMonth: this.changeStartingMonth,
-                    showPrevButton: true,
-                    showNextButton: showNav }),
-                React.createElement(Calendar, {
-                    days: calendarEndDays,
-                    month: this.state.endingMonth,
-                    changeMonth: this.changeEndingMonth,
-                    showPrevButton: showNav,
-                    showNextButton: true })
+                { className: "date-picker" },
+                React.createElement(DateDisplay, {
+                    startDate: this.state.startDate,
+                    endDate: this.state.endDate,
+                    clearSelection: this.clearSelection }),
+                React.createElement(
+                    "div",
+                    { className: "calendars" },
+                    React.createElement(Calendar, {
+                        days: calendarStartDays,
+                        month: this.state.startingMonth,
+                        changeMonth: this.changeStartingMonth,
+                        showPrevButton: true,
+                        showNextButton: showNav }),
+                    React.createElement(Calendar, {
+                        days: calendarEndDays,
+                        month: this.state.endingMonth,
+                        changeMonth: this.changeEndingMonth,
+                        showPrevButton: showNav,
+                        showNextButton: true })
+                )
             );
         }
     }]);

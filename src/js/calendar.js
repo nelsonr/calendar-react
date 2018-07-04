@@ -5,31 +5,76 @@ const getMonthDaysCount = function (month) {
     return d.getDate();
 }
 
-const getMonthDays = function (month) {
+const getMonthDays = function (date) {
+    const year = date.getFullYear();
+    const month = date.getMonth()
     const monthDaysCount = getMonthDaysCount(month);
-    const currentYear = (new Date()).getFullYear();
 
-    return Array(monthDaysCount).fill().map((_, index) => 
-        new Date(currentYear, month, index + 1)
+    return Array(monthDaysCount).fill().map((_, index) =>
+        new Date(year, month, index + 1)
     );
 }
 
 var months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
 ];
 
-class Calendar extends React.Component {    
+class DateDisplay extends React.Component {
+    dateToString(date) {
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+
+        if (day < 10) {
+            day = "0" + day;
+        }
+
+        if (month < 10) {
+            month = "0" + month;
+        }
+
+        return `${day}/${month}/${date.getFullYear()}`;
+    }
+
+    render () {
+        let startDate = "";
+        let endDate = "";
+        let clearBtnClass = "date-display__clear";
+
+        if (this.props.startDate) {
+            startDate = this.dateToString(this.props.startDate);
+        }
+
+        if (this.props.endDate) {
+            endDate = this.dateToString(this.props.endDate);
+        }
+
+        if (this.props.startDate === null && this.props.endDate === null) {
+            clearBtnClass += " hide";
+        }
+
+        return (
+            <div className="date-display">
+                <div className="date-display__content">
+                    <span>{startDate}</span> - <span>{endDate}</span>
+                </div>
+                <div className={clearBtnClass} onClick={this.props.clearSelection}>Clear</div>
+            </div>
+        )
+    }
+}
+
+class Calendar extends React.Component {
     render() {
         let prevButtonClass = "calendar__prev";
         let nextButtonClass = "calendar__next";
@@ -41,16 +86,26 @@ class Calendar extends React.Component {
         if (this.props.showNextButton === false) {
             nextButtonClass += " hide";
         }
-        
+
         return (
             <div className="calendar">
                 <div className="calendar__header">
-                    <div className="calendar__month">{months[this.props.month]}</div>
+                    <div className="calendar__month">{months[this.props.month.getMonth()] + " " + this.props.month.getFullYear()}</div>
 
                     <div className="calendar__nav">
                         <button className={prevButtonClass} onClick={_ => this.props.changeMonth(-1)}>&lt;</button>
                         <button className={nextButtonClass} onClick={_ => this.props.changeMonth(1)}>&gt;</button>
                     </div>
+                </div>
+
+                <div className="calendar__week-days">
+                    <div>S</div>
+                    <div>T</div>
+                    <div>Q</div>
+                    <div>Q</div>
+                    <div>S</div>
+                    <div>S</div>
+                    <div>D</div>
                 </div>
 
                 <div className="calendar__days">
@@ -64,18 +119,27 @@ class Calendar extends React.Component {
 class CalendarDatePicker extends React.Component {
     constructor(props) {
         super(props);
-        
+
+        let startingMonth = new Date();
+        startingMonth.setDate(1);
+
+        let endingMonth = new Date(
+            startingMonth.getFullYear(),
+            startingMonth.getMonth() + 1
+        );
+
         this.state = {
             startDate: null,
             endDate: null,
-            startingMonth: (new Date()).getMonth(),
-            endingMonth: (new Date()).getMonth() + 1
+            startingMonth: startingMonth,
+            endingMonth: endingMonth
         }
 
         this.changeStartingMonth = this.changeStartingMonth.bind(this)
         this.changeEndingMonth = this.changeEndingMonth.bind(this)
+        this.clearSelection = this.clearSelection.bind(this)
     }
-    
+
     setStartDate(day) {
         if (day < this.state.endDate) {
             this.setState({
@@ -96,41 +160,57 @@ class CalendarDatePicker extends React.Component {
     }
 
     changeStartingMonth(dir) {
-        let newMonth = this.state.startingMonth + dir;
-
-        if (newMonth < 0) {
-            newMonth = 0;
-        } else if (newMonth > 11) {
-            newMonth = 11;
-        }
-        
         this.setState({
-            startingMonth: newMonth
+            startingMonth: new Date(
+                this.state.startingMonth.getFullYear(),
+                this.state.startingMonth.getMonth() + dir,
+                1
+            )
         });
     }
 
     changeEndingMonth(dir) {
-        let newMonth = this.state.endingMonth + dir;
-
-        if (newMonth < 0) {
-            newMonth = 0;
-        } else if (newMonth > 11) {
-            newMonth = 11;
-        }
-        
         this.setState({
-            endingMonth: newMonth
+            endingMonth: new Date(
+                this.state.endingMonth.getFullYear(),
+                this.state.endingMonth.getMonth() + dir,
+                1
+            )
         });
-    }   
-    
+    }
+
+    clearSelection() {
+        this.setState({
+            startDate: null,
+            endDate: null
+        })
+    }
+
+    showNav() {
+        let startingMonth = this.state.startingMonth.getMonth();
+        let startingYear = this.state.startingMonth.getFullYear();
+        let endingMonth = this.state.endingMonth.getMonth();
+        let endingYear = this.state.endingMonth.getFullYear();
+
+        if (endingYear > startingYear) {
+            return true;
+        }
+
+        return endingMonth - startingMonth > 0;
+    }
+
     render() {
         let startingMonthDays = getMonthDays(this.state.startingMonth);
         let endingMonthDays = getMonthDays(this.state.endingMonth);
-        let showNav = (this.state.endingMonth - this.state.startingMonth > 1);
-        
+        let showNav = this.showNav();
+
         let calendarStartDays = startingMonthDays.map((day) => {
             let className = "calendar__day";
-            
+
+            if (day.getDate() === 1) {
+                className += " calendar__day--offset-" + (day.getDay() || 7);
+            }
+
             if (this.state.startDate) {
                 if (day.getTime() === this.state.startDate.getTime()) {
                     className += " calendar--range calendar--start";
@@ -148,7 +228,11 @@ class CalendarDatePicker extends React.Component {
 
         let calendarEndDays = endingMonthDays.map((day) => {
             let className = "calendar__day";
-            
+
+            if (day.getDate() === 1) {
+                className += " calendar__day--offset-" + (day.getDay() || 7);
+            }
+
             if (this.state.startDate) {
                 if (day <= this.state.startDate) {
                     className += " calendar--disabled";
@@ -169,22 +253,29 @@ class CalendarDatePicker extends React.Component {
 
             return <div className={className} key={"end-" + day.getDate()} onClick={_ => this.setEndDate(day)}>{day.getDate()}</div>
         });
-        
-        return (
-            <div className="calendars">
-                <Calendar 
-                    days={calendarStartDays} 
-                    month={this.state.startingMonth} 
-                    changeMonth={this.changeStartingMonth}
-                    showPrevButton={true}
-                    showNextButton={showNav} />
 
-                <Calendar 
-                    days={calendarEndDays} 
-                    month={this.state.endingMonth} 
-                    changeMonth={this.changeEndingMonth}
-                    showPrevButton={showNav}
-                    showNextButton={true} />
+        return (
+            <div className="date-picker">
+                <DateDisplay
+                    startDate={this.state.startDate}
+                    endDate={this.state.endDate}
+                    clearSelection={this.clearSelection} />
+
+                <div className="calendars">
+                    <Calendar
+                        days={calendarStartDays}
+                        month={this.state.startingMonth}
+                        changeMonth={this.changeStartingMonth}
+                        showPrevButton={true}
+                        showNextButton={showNav} />
+
+                    <Calendar
+                        days={calendarEndDays}
+                        month={this.state.endingMonth}
+                        changeMonth={this.changeEndingMonth}
+                        showPrevButton={showNav}
+                        showNextButton={true} />
+                </div>
             </div>
         )
     }
